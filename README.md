@@ -1,16 +1,16 @@
 # AtosInnovatos2017
 This repository contains the source code of the Data Analytics App used at the Atos Innovatos Plaza 2017 event.
-The app is based on a public dataset and is used for demo purposes.
+The app is based on a public dataset and is ONLY used for (public) demo purposes.
 
 # Installation instructions
-This app is based on R & Shiny. It has been designed to run from a local Rstudio installation, as it is presented in the demo. 
+This app is based on R & Shiny. It has been designed to run from a local Rstudio installation on a laptop, as it is presented in the demo. 
 In case you want to run this app on a Shiny server, some small modifications will need to happen.
 
-* Please clone this github repository to your local machine
+* Please clone this github repository to your local machine ( https://github.com/mvdbosch/AtosInnovatos2017.git )
 
 * Open the  project from your Rstudio environment.
 
-* Open the file "Atos_Innovatos2017.R" and click on the "Run App" button on the top right.
+* Open the file **"Atos_Innovatos2017.R"** and click on the **"Run App"** button on the top right.
 
 ![How to run the app](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/HowToRun.jpg)
 
@@ -24,7 +24,7 @@ install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart',
 
 # Porting this application to Shiny server
 
-Currently the UI and Server code has been placed in 1 file (Atos_Innovatos2017.R). 
+For ease of use, currently the UI and Server code have been placed in 1 file (Atos_Innovatos2017.R). 
 When running this app on a Shiny-server, splitting up the UI and Server functions into UI.R and Server.R is needed.
 
 # About the Innovation Plaza 2017 event
