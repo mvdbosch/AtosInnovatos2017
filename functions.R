@@ -10,6 +10,7 @@ library(pastecs)
 library(DMwR)
 library(corrplot)
 library(caret)
+library(xgboost)
 
 options(scipen=100)
 options(digits=2)
@@ -101,6 +102,85 @@ plotCorrGram <- function(no_cols)
   M <- cor(data_value,use = 'pairwise.complete.obs')
   col3 <- colorRampPalette(c("red", "white", "blue")) 
   corrplot(M, method="color",col = col3(20),tl.col="black",na.label=" ",tl.cex=0.5)
+  
+}
+
+findTop100Features <- function(input_data,target_variable,SMOTE_BALANCE = TRUE, USE_RF = TRUE, USE_XGBOOST = TRUE, NO_RF_TREES = 500, RETURN_VAR_VECTOR = TRUE)
+{
+  # Description: Re-usable helper function to easily find relevant parameters in a dataset
+  # Author: Marcel van den Bosch <marcel.vandenbosch@atos.net>
+  
+  # Find the TOP100 most interesting features using RandomForest & XGBoost and return it as a list of names
+  
+  # Smote only works with factor/numerics
+  relevant_cols <- names(input_data)[unlist(lapply(seq(1:length(names(input_data))), function(x)  { if(paste(class(input_data[,x]),collapse=' ') %in% c('numeric','factor')) { return(x)} else { return(NULL)} } ))];
+  data_balanced <- subset(input_data,select=relevant_cols);
+  
+  if (SMOTE_BALANCE == TRUE)
+  {
+    data_balanced <-SMOTE(form = FAIL ~., data = data_balanced, perc.over = 500,perc.under = 120)
+  } 
+  
+  # Split out the data with target and input features
+  data_balanced.target <- subset(data_balanced,select=target_variable);
+  data_balanced.input <- subset(data_balanced,select=setdiff(names(data_balanced),target_variable));
+  
+  data_balanced.target.zero.one<-as.matrix(ifelse(data_balanced.target=='FAIL',yes=1,no=0))
+  
+  if (USE_XGBOOST == TRUE)
+  {
+  bst <- xgboost(data = as.matrix(data_balanced.input), label = data_balanced.target.zero.one, max_depth = 15,
+                 eta = 0.1, nthread = 5, nrounds = 200,objective = "reg:logistic",  missing = NaN )
+  
+  # Now calculating the predictor importance
+  importanceRaw <- xgb.importance(feature_names = colnames(data_balanced.input), model = bst, data = as.matrix(data_balanced.input), label = data_balanced.target.zero.one)
+  
+  #putting the data into dataframes
+  importance.xgboost<-data.frame(importanceRaw$Feature,importanceRaw$Gain)
+  importance.xgboost <- importance.xgboost[order(-importance.xgboost$importanceRaw.Gain),] #sorting the importances based on the gain
+  
+  importance.XG <- data.frame(Variable=importance.xgboost$importanceRaw.Feature[1:100],Importance=importance.xgboost$importanceRaw.Gain[1:100],Rank=seq(1:100),Type='XGBoost');
+  }
+  
+  if (USE_RF == TRUE)
+  {
+    data_balanced <- rfImpute(FAIL ~ ., data=data_balanced, iter=3, ntree=50)
+    
+    fit.rf =randomForest(FAIL ~., data=data_balanced,importance=TRUE,ntree=NO_RF_TREES)
+    
+    importance.randomForest<-data.frame(row.names(varImp(fit.rf)),varImp(fit.rf))
+    names(importance.randomForest)<-c("Variable","importanceRaw.Gain")
+    importance.randomForest <- importance.randomForest[order(-importance.randomForest$importanceRaw.Gain),]
+    
+    importance.RF <- data.frame(Variable=importance.randomForest$Variable[1:100],Importance=importance.randomForest$importanceRaw.Gain[1:100],Rank=seq(1:100),Type='RF');
+  }
+  
+  if (USE_RF == TRUE && USE_XGBOOST == TRUE)
+  {
+    # UNION/Rbind results
+    result <- union(importance.xgboost$importanceRaw.Feature[1:100],importance.randomForest$Variable[1:100]);
+    importance.ALL <- rbind(importance.XG,importance.RF)
+  } else if (USE_RF == TRUE)
+  {
+    result <- importance.randomForest$Variable[1:100];
+    importance.ALL <- importance.RF;
+  } else if (USE_XGBOOST == TRUE)
+  {
+    result <- importance.xgboost$importanceRaw.Feature[1:100];
+    importance.ALL <- importance.XG;
+  }
+  
+
+  if (RETURN_VAR_VECTOR == TRUE)
+  {
+    return(result[1:100]);
+    
+  } else {
+    
+    importance.ALL <- importance.ALL[order(importance.ALL$Rank),];
+    row.names(importance.ALL) <- NULL;
+    return(head(importance.ALL,100));
+  }
   
   
 }

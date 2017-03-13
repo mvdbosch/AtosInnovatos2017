@@ -5,10 +5,10 @@
 # Author: Marcel van den Bosch <marcel.vandenbosch@atos.net>
 # Date: 07-Mar-2017
 #
-# Copyright 2017: Atos Codex
+# Copyright 2017: Atos Consulting & Atos Codex
 # 
 # Description: In this app we demonstrate the use of
-# analytics in a semiconductor manufacturing cace
+# analytics in a semiconductor manufacturing case
 ############################################################
 
 
@@ -30,6 +30,7 @@ library(rattle)
 library(randomForest)
 library(sampling)
 library(e1071)
+library(caTools)
 
 # Include helper files
 source('functions.R')
@@ -53,6 +54,7 @@ ui <- dashboardPage(
         img(src="resources/atos_codex_logo.png", align="center")
       ),tags$div(tags$p(" ")),
 
+      # List of menu items in our app
       menuItem("Welcome", tabName = "welcome", icon = icon("home")),
       menuItem("Data", tabName = "Data", icon = icon("database")),
       menuItem("Case Overview", tabName = "CaseOverview", icon = icon("bar-chart")),
@@ -60,8 +62,10 @@ ui <- dashboardPage(
       menuItem("EDA Density", tabName = "ExploreDensity", icon = icon("bar-chart")),
       menuItem("EDA Correlation", tabName = "ExploreCorrelation", icon = icon("area-chart")),
       menuItem("Rebalancing", tabName = "Rebalance", icon = icon("pie-chart")),
+      menuItem("Feature Select", tabName = "Feature", icon = icon("list-ol")),
       menuItem("Decision Tree", tabName = "RPartModel", icon = icon("leaf")),
-      menuItem("RandomForest", tabName = "RFmodel", icon = icon("tree"))
+      menuItem("RandomForest", tabName = "RFmodel", icon = icon("tree")),
+      menuItem("SVM", tabName = "SVMmodel", icon = icon("expand"))
           
     )
     
@@ -108,7 +112,7 @@ ui <- dashboardPage(
     ## End of Welcome tab
     
     
-    # Second tab content
+    # Begin of the Data tab.
     tabItem(tabName = "Data",
             fluidRow(
               box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
@@ -120,8 +124,9 @@ ui <- dashboardPage(
               )
             )
     ),
+    # End of the data tab
     
-    # Third tab content
+    # Begin of the case overview tab
     tabItem(tabName = "CaseOverview",
             fluidRow(
             box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
@@ -134,7 +139,9 @@ ui <- dashboardPage(
             )
                 
     ),
-    # Third tab content
+    # End of the case overview tab
+    
+    # Begin of the summary statistics tab.
     tabItem(tabName = "ExploreSummary",
             fluidRow(
               box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
@@ -150,8 +157,9 @@ ui <- dashboardPage(
             
             
             ),
+    # End of the summary statistics tab
     
-    # Third tab content
+    # Begin of the density compare tab
     tabItem(tabName = "ExploreDensity",
             fluidRow(
             box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
@@ -172,8 +180,9 @@ ui <- dashboardPage(
               
             
     ),
+    # End of the density compare tab
     
-    # Third tab content
+    # Begin of the correlation plot tab
     tabItem(tabName = "ExploreCorrelation",
             fluidRow(
               box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
@@ -194,10 +203,9 @@ ui <- dashboardPage(
             
             
             ),
+    # End of the correlation plot tab
     
-    # Tab for SMOTE example
-    
-    # Third tab content
+    # Begin tab for SMOTE example
     tabItem(tabName = "Rebalance",
             fluidRow(
               box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
@@ -222,8 +230,9 @@ ui <- dashboardPage(
             )
             
     ),
+    # End of the SMOTE example tab
     
-    # Third tab content
+    # Begin decision tree tab
     tabItem(tabName = "RPartModel",
             fluidRow(
               box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 12,
@@ -249,8 +258,9 @@ ui <- dashboardPage(
             )
             
     ),
+    # End of the decision tree tab
     
-    # Third tab content
+    # Begin of Random Forest modelling tab
     tabItem(tabName = "RFmodel",
             fluidRow(
               box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 12,
@@ -278,10 +288,63 @@ ui <- dashboardPage(
                   verbatimTextOutput("Out_rf")
               ))
             
+    ),
+    # End of the Random Forest modelling tab
+    
+    
+    # Begin of the feature selection example tab
+    tabItem(tabName = "Feature",
+            fluidRow(
+              box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 10,
+                  tags$p("In the example below we will select the most relevant features (i.e. columns) from our dataset. This is done with a combination of XGBoost and RandomForest. The best
+                         100 features are returned")
+              )
+            ),
+            fluidRow(
+              box(title = "Running Feature Selection", status = "primary", solidHeader = TRUE,width = 10,
+                  checkboxInput("chkFeatureWithSMOTE",label="First run SMOTE to balance classes",value = TRUE),
+                  checkboxInput("chkFeatureWithRF",label="Use RF to find  features",value = TRUE),
+                  checkboxInput("chkFeatureWithXG",label="Use XG Boost to find  features",value = TRUE),
+                  actionButton('btnRunFeature', label="Run", icon = icon("ok", lib = "glyphicon"))
+              )
+            ),
+            fluidRow(
+              box(id = "Box_Feature_Table",title = "Most promising features", status = "primary", solidHeader = TRUE,width = 10,collapsible = TRUE,collapsed = FALSE,
+                  dataTableOutput("FeatureTable")
+              )
+            )
+     
+            
+    ),
+    # End of the feature selection tab
+    
+    
+    # Begin of the SVM modelling tab
+    tabItem(tabName = "SVMmodel",
+            fluidRow(
+              box(title = "What is this?", status = "primary", solidHeader = TRUE,width = 12,
+                  tags$p("In order to move towards a more advanced model, we use SVM (Support Vector Machines).")
+              )
+            ),
+            fluidRow(
+              box(title = "Running SVM", status = "primary", solidHeader = TRUE,width = 12,
+                  checkboxInput("chkSVMWithSMOTE",label="First run SMOTE to balance classes",value = FALSE),
+                  checkboxInput("chkSVMWithTOPFeatures",label="Only use the 100 best features in model",value = FALSE),
+                  checkboxInput("chkSVMWithTest",label="Split in Training/Test set",value = FALSE),
+                  actionButton('btnRunSVM', label="Run SVM", icon = icon("ok", lib = "glyphicon"))
+              )
+              ),
+            fluidRow(
+              box(id = "Box_SVM_Results_conf",title = "SVM Results", status = "primary", solidHeader = TRUE,width = 12,collapsible = TRUE,collapsed = FALSE,
+                  verbatimTextOutput("Out_svm")
+              ))
+            
     )
-   
+    # End of the SVM modelling tab
     
   )
+  # End of the dashboard body
+  
   )
 )
 
@@ -302,6 +365,7 @@ server <- function(input, output,session) {
       
     
     # For performance reasons, only execute if the tab is actually opened by the user.
+    # Logic behind the data table overview tab
     if (input$tab == 'Data')
     {
         output$dtViewDataset = renderDataTable({
@@ -312,6 +376,7 @@ server <- function(input, output,session) {
     }
       
       
+      # Logic behind the summary statistcs tab
       if (input$tab == 'ExploreSummary')
       {
           output$dtSummary = renderDataTable({
@@ -321,6 +386,7 @@ server <- function(input, output,session) {
         
       }
       
+      # Logic behind the density compare tab
       if (input$tab == 'ExploreDensity')
       {
         output$DensityPlot <- renderPlot({ plotDensity(input$selectVarNameForDensity) });
@@ -334,37 +400,35 @@ server <- function(input, output,session) {
           });
       }
         
-      
+      # Logic behind the case stats overview tab
       if (input$tab == 'CaseOverview')
       {
         output$CaseStatsPlot <- renderPlot({ plotCaseStats() });
         
       }
       
-
-      
       
     })
     
+    # Below code is triggered once a button has been pressed.
     
     observeEvent(input$btnRunSMOTE, {
+      
+      # This code implemented the SMOTE example
     
 
-      data_old <-data.table(copy(data)) #speeding up by turning into data.table
+      data_old <-data.table(copy(data)) 
       data_old <- subset(data_old,select=-TIMESTAMP);
       
       table(data_old$FAIL) #Statistics before 
-      # 500 extra cases from the minority class are generated
-      # 120 extra cases from the majority classes are selected for each case generated from the minority class
       data_balanced <-SMOTE(form = FAIL ~., data = data_old, perc.over = 500,perc.under = 120)
-      table(data_balanced$FAIL)#statistics after 
       
       output$Plot_SMOTE_Old_CaseStats <- renderPlot({ 
         
           out <- table(data_old$FAIL)
           linch <-  max(strwidth(out, "inch")+0.7, na.rm = TRUE)
           par(mai=c(1.02,linch,0.82,0.42))
-          x <- barplot(out,horiz = TRUE,cex.names=0.9,las=1,xlab=paste("# of cases"),xlim=c(0,max(out,na.rm=TRUE)+50),col="cornflowerblue",,main = 'Before SMOTE')
+          x <- barplot(out,horiz = TRUE,cex.names=0.9,las=1,xlab=paste("# of cases"),xlim=c(0,max(out,na.rm=TRUE)+50),col="cornflowerblue",main = 'Before SMOTE')
           text(out+pmin((5+out*0.7),20),x,labels=round(out), col="black",cex=0.75)
           
       })
@@ -386,22 +450,22 @@ server <- function(input, output,session) {
       # Call our custom box collapse hack
       js$collapse("Box_SMOTE_CaseStats1")
       js$collapse("Box_SMOTE_Dataset")
-      
 
     })
     
     
     observeEvent(input$btnRunRPart, {
+      # Code below implements the decision tree functionality
       
       isolate({
         
         if (input$chkRPartWithSMOTE == TRUE )
         {
-          data_old <-data.table(copy(data)) #speeding up by turning into data.table
+          data_old <-data.table(copy(data)) 
           data_old <- subset(data_old,select=-TIMESTAMP);
           data_balanced <-SMOTE(form = FAIL ~., data = data_old, perc.over = 500,perc.under = 120)
         } else {
-          data_balanced <-data.table(copy(data)) #speeding up by turning into data.table
+          data_balanced <-data.table(copy(data))
           data_balanced <- subset(data_balanced,select=-TIMESTAMP);
         }
         
@@ -427,6 +491,7 @@ server <- function(input, output,session) {
     
     
     observeEvent(input$btnRunRF, {
+      # Below code implements the RandomForest modelling functionality
       
       isolate({
         
@@ -512,7 +577,117 @@ server <- function(input, output,session) {
     
       
     })
+    
+    
+    observeEvent(input$btnRunFeature, {
+      # Code below calls the function to find the TOP100 most promising features
+      
+        output$FeatureTable = renderDataTable({
+          isolate({
+            datatable(findTop100Features(copy(data),'FAIL',SMOTE_BALANCE = input$chkFeatureWithSMOTE, USE_RF = input$chkFeatureWithRF, USE_XGBOOST = input$chkFeatureWithXG,RETURN_VAR_VECTOR = FALSE), options = list(scrollX = TRUE,pageLength = 20))
+          })
+
+      })
+      
+      
+    })
+    
+    
+    observeEvent(input$btnRunSVM, {
+      # This code implements the SVM modelling functionality
+      
+      isolate({
+        
+        if (input$chkSVMWithTest == TRUE)
+        {
+          # Do a 75/25 split
+          sample = sample.split(data$FAIL, SplitRatio = .75)
+          data_train = subset(copy(data), sample == TRUE)
+          data_test = subset(copy(data), sample == FALSE)
+        } else {
+          # Just make both sets the same
+          data_train <- copy(data);
+          data_test <- copy(data);
+        }
+        
+        if (input$chkSVMWithTOPFeatures == TRUE)
+        {
+        top100_cols <- findTop100Features(data_train,'FAIL');
+        }
+        
+        if (input$chkSVMWithSMOTE == TRUE )
+        {
+          data_old <- data_train
+          data_old <- subset(data_old,select=-TIMESTAMP);
+          data_balanced <-SMOTE(form = FAIL ~., data = data_old, perc.over = 500,perc.under = 120)
+        } else {
+          data_balanced <- data_train 
+          data_balanced <- subset(data_balanced,select=-TIMESTAMP);
+        }
+        
+        if (input$chkSVMWithTOPFeatures == TRUE)
+        {
+        data_balanced <- subset(data_balanced,select=c(top100_cols,'FAIL'));
+        }
+        
+        columns.to.keep<-names(which(colMeans(is.na(data_balanced)) < 0.5)) # this removes those columns with more than 50% NULLs
+        data_balanced<-subset(data_balanced,select = columns.to.keep) #the columns will stay which has less than 50% NAs
+        
+        nzv <- nearZeroVar(data_balanced)
+        data_balanced <- data_balanced[,-nzv]
+        
+        
+        data_balanced[is.na(data_balanced)]<--9999
+        
+        xData <- subset(data_balanced,select=-FAIL);
+        yData <- data_balanced$FAIL;
+        
+        
+        fit.svm<-svm(x= xData,y= yData)
+        
+        # Get our test set from the original split
+        test_data <- data_test
+        test_result <- test_data$FAIL; # Make sure we have the results seaprate - as some functions like it separate
+        
+        # Remove the target and timestamp
+        test_data <- subset(test_data,select=c(-TIMESTAMP,-FAIL))
+        
+        # NA's are not desired, as it hinders prediction.
+        test_data[is.na(test_data)]<--9999 #just some random number that never happened in the data
+        
+        if (input$chkSVMWithTOPFeatures == TRUE)
+        {
+        test_data<-subset(test_data,select = c(top100_cols));
+        }
+        
+        test_data<-subset(test_data,select = setdiff(columns.to.keep,'FAIL')) #the columns will stay which has less than 50% NAs
+        test_data <- test_data[,-nzv]
+        
+        # Do the actual prediction with our previously trained model
+        pred_data <- predict(object = fit.svm, newdata = test_data)
+        
+        xtab <- table(pred_data, test_result)
+        
+        # Write results back to the app
+        output$Out_svm = renderPrint({
+          isolate({
+            cat("Started with options:\r\n")
+            cat("* SMOTE : ", input$chkSVMWithSMOTE,"\r\n")
+            cat("* TOP100 Features : ",input$chkSVMWithTOPFeatures,"\r\n")
+            cat("* TEST/TRAINING SET : ",input$chkSVMWithTest,"\r\n")
+            cat("---------------------------------------------------------\r\n")
+            confusionMatrix(xtab)
+          })
+        })
+        
+        
+      })
+      
+      
+      
+    })
   
 }
 
+# This is used to start the app
 shinyApp(ui, server)
