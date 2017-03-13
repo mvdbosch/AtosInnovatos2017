@@ -12,7 +12,7 @@ In case you want to run this app on a Shiny server, some small modifications wil
 
 * Open the file "Atos_Innovatos2017.R" and click on the "Run App" button on the top right.
 
-![How to run the app]((https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/HowToRun.jpg)
+![How to run the app](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/HowToRun.jpg)
 
 # Missing packages?
 
