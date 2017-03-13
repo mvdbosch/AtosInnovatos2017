@@ -38,3 +38,13 @@ This informal evening is to challenge your thinking about the forces that will s
 * Check out the Atos Innovatos Plaza 2017 [slides](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/Innovatos 2017 - Codex and Data Analytics in Manufacturing v0.2.pdf)
 
 * Contact me at: marcel.vandenbosch@atos.net
+
+# Some screenshots
+
+![Screenshot 1](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/app_screenshot1.jpg)
+
+![Screenshot 2](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/app_screenshot2.jpg)
+
+![Screenshot 3](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/app_screenshot3.jpg)
+
+![Screenshot 4](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/app_screenshot4.jpg)
