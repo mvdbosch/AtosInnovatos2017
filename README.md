@@ -19,7 +19,7 @@ In case you want to run this app on a Shiny server, some small modifications wil
 Execute the following line, to install all required packages into your local R environment
 
 ```R
-install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart','rattle','randomForest','sampling','e1071','caTools','sm','pastecs','DMwR','corrplot','caret','xgboost'))
+install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart','rattle','randomForest','sampling','e1071','caTools','sm','pastecs','DMwR','corrplot','caret','xgboost','V8'))
 ```
 
 # Porting this application to Shiny server
@@ -35,7 +35,7 @@ This informal evening is to challenge your thinking about the forces that will s
 
 # More information
 
-* Check out the Atos Innovatos Plaza 2017 [slides](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/Innovatos 2017 - Codex and Data Analytics in Manufacturing v0.2.pdf)
+* Check out the Atos Innovatos Plaza 2017 [slides](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/Innovatos%202017%20-%20Codex%20and%2Data%20Analytics%20in%20Manufacturing%20v0.2.pdf)
 
 * Contact me at: marcel.vandenbosch@atos.net
 
