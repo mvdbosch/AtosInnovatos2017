@@ -19,13 +19,12 @@ In case you want to run this app on a Shiny server, some small modifications wil
 Execute the following line, to install all required packages into your local R environment
 
 ```R
-install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart','rattle','randomForest','sampling','e1071','caTools','sm','pastecs','DMwR','corrplot','caret','xgboost','V8'))
+install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart','rattle','randomForest','sampling','e1071','caTools','sm','pastecs','DMwR','corrplot','caret','xgboost','V8','ggplot2','assertthat'))
 ```
 
-# Porting this application to Shiny server
+# Running this application on shiny-server
 
-For ease of use, currently the UI and Server code have been placed in 1 file (Atos_Innovatos2017.R). 
-When running this app on a Shiny-server, splitting up the UI and Server functions into UI.R and Server.R is needed.
+You can use the server.R and ui.R files, to host the application on a shiny-server.
 
 # About the Innovation Plaza 2017 event
 
