@@ -11,7 +11,7 @@ docker push your.registry.here/atosanalyticsapp
 
 # Running the docker container
 ```Bash
-docker run -d -p 3838:3838 registry.marcel.im/atosanalyticsapp
+docker run -d -p 3838:3838 your.registry.here/atosanalyticsapp
 ```
  
 
