@@ -23,6 +23,8 @@ docker pull registry.marcel.im/atosanalyticsapp
 docker run -p 3838:3838 registry.marcel.im/atosanalyticsapp
 ```
 
+You can now point your browser to the http://*ipadres_or_hostname*:3838/AtosInnovatos2017/
+
 # Missing packages?
 
 Execute the following line, to install all required packages into your local R environment
