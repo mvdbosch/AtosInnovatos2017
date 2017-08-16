@@ -14,6 +14,15 @@ In case you want to run this app on a Shiny server, some small modifications wil
 
 ![How to run the app](https://github.com/mvdbosch/AtosInnovatos2017/blob/master/www/HowToRun.jpg)
 
+# Running the docker container image
+You can pull the latest docker image for this demo app from my private registry. In addition, you can
+also build you own docker image, using the Dockerfile provided in the docker directory.
+
+```Bash
+docker pull registry.marcel.im/atosanalyticsapp
+docker run -p 3838:3838 registry.marcel.im/atosanalyticsapp
+```
+
 # Missing packages?
 
 Execute the following line, to install all required packages into your local R environment
