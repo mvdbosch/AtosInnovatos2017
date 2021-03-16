@@ -41,11 +41,11 @@ spec:
           - name: "OAUTH2_PROXY_PROVIDER"
             value: "azure"
           - name: "OAUTH2_PROXY_AZURE_TENANT"
-            value: "eb220b88-5284-444b-aaa3-51f828b715db"
+            value: "x"
           - name: "OAUTH2_PROXY_CLIENT_ID"
-            value: "f1e3584c-79dc-43e9-af42-08894466e8bc"
+            value: "x"
           - name: "OAUTH2_PROXY_CLIENT_SECRET"
-            value: "26gD4WH.hVoxL5t96_P-N2zak3twSNnZ3-"
+            value: "x"
 
           # Cookie Config
           #- name: "OAUTH2_PROXY_COOKIE_SECURE"
@@ -61,7 +61,7 @@ spec:
           - name: "OAUTH2_PROXY_REDIS_CONNECTION_URL"
             value: "redis://apexdemo.redis.cache.windows.net:6379"
           - name: "OAUTH2_PROXY_REDIS_PASSWORD"
-            value: "l6kMWRR1pQl1cwZINL5HtNt1FhJ5TJUyzNLw0LQM1mI="
+            value: "x"
 
 
           #Proxy Config
