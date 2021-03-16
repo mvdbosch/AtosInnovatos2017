@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: apex-analyticsapp
-  namespace: apex-demo
 spec:
   replicas: 1
   selector:
@@ -17,13 +16,12 @@ spec:
       - name: analyticsapp
         image: registry.marcel.im/atosanalyticsapp
         ports:
-        - containerPort: 3838
+        - containerPort: 30001
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: apex-entrypoint
-  namespace: apex-demo
 spec:
   type: NodePort
   selector:
@@ -31,4 +29,106 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
-    nodePort: 3838
+    nodePort: 30001
+---
+# oath
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: oauth-proxy
+  name: oauth-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4180
+      targetPort: 4180
+      protocol: TCP
+      name: web
+  selector:
+    app: "oauth-proxy"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: oauth-proxy
+  name: oauth-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "oauth-proxy"
+  template:
+    metadata:
+      labels:
+        app: oauth-proxy
+    spec:
+      containers:
+      - name: oauth-proxy
+        image: "oauth2-proxy/oauth2-proxy:v6.1.1"
+        env:
+          # OIDC Config
+          - name: "OAUTH2_PROXY_PROVIDER"
+            value: "oidc"
+          - name: "OAUTH2_PROXY_OIDC_ISSUER_URL"
+            value: "https://signin.my-oidc-provider.com"
+          - name: "OAUTH2_PROXY_CLIENT_ID"
+            value: "<my oauth client id>"
+          - name: "OAUTH2_PROXY_CLIENT_SECRET"
+            value: "<my oauth client secret>"
+
+
+          # Cookie Config
+          - name: "OAUTH2_PROXY_COOKIE_SECRET"
+            value: "<my cookie secret>"
+          - name: "OAUTH2_PROXY_COOKIE_DOMAINS"
+            value: ".mydomain.com"
+
+          # Proxy config
+          - name: "OAUTH2_PROXY_EMAIL_DOMAINS"
+            value: "mydomain.com"
+          - name: "OAUTH2_PROXY_WHITELIST_DOMAINS"
+            value: ".mydomain.com"
+          - name: "OAUTH2_PROXY_HTTP_ADDRESS"
+            value: "0.0.0.0:4180"
+          - name: "OAUTH2_PROXY_SET_XAUTHREQUEST"
+            value: "true"
+          - name: "OAUTH2_PROXY_UPSTREAMS"
+            value: "file:///dev/null"
+---
+# nginx ingress + redirect
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  labels:
+    app: oauth-proxy
+  name: oauth-proxy
+spec:
+  rules:
+    - host: oauthproxy.apex.atoscloud.org
+      http:
+        paths:
+          - path: /oauth2
+            backend:
+              serviceName: oauth-proxy
+              servicePort: 4180
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-frontend
+  annotations:
+    nginx.ingress.kubernetes.io/auth-signin: http://oauthproxy.apex.atoscloud.org/oauth2/start
+    nginx.ingress.kubernetes.io/auth-url: http://oauthproxy.apex.atoscloud.org/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User,X-Auth-Request-Email
+spec:
+  rules:
+    - host: demo.apex.atoscloud.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              serviceName: apex-entrypoint
+              servicePort: 8080
