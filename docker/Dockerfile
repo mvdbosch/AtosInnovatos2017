@@ -1,4 +1,4 @@
-FROM centos:latest
+FROM centos:7
 
 ## This handle reaches Marcel van den Bosch
 MAINTAINER "Marcel van den Bosch" marcel.vandenbosch@atos.net
@@ -14,7 +14,12 @@ RUN yum install -y git wget libcurl-devel libpng-devel libjpeg-devel vim R-core 
 
 # R / Shiny specifics
 RUN R -e "install.packages(c('shiny', 'rmarkdown'), repos='https://cran.rstudio.com/')"
-RUN R -e "install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart','rattle','randomForest','sampling','e1071','caTools','sm','pastecs','DMwR','corrplot','caret','xgboost','V8','ggplot2','assertthat','rpart.plot'),repos='http://cran.us.r-project.org')"
+RUN R -e "install.packages(c('shiny','shinydashboard','shinyjs','data.table','DT','rpart','rattle','randomForest','sampling','e1071','caTools','sm','pastecs','corrplot','caret','xgboost','V8','ggplot2','assertthat','rpart.plot'),repos='http://cran.us.r-project.org')"
+
+# Hack to fix the obsolete package
+RUN R -e "install.packages(c('xts', 'quantmod', 'zoo', 'abind', 'ROCR'), repos='https://cran.rstudio.com/')"
+RUN R -e "install.packages('https://cran.r-project.org/src/contrib/Archive/DMwR/DMwR_0.4.1.tar.gz', repos=NULL, type='source')"
+RUN R -e "install.packages('http://cran.r-project.org/src/contrib/Archive/xgboost/xgboost_0.90.0.2.tar.gz', repos=NULL, type='source')"
 
 RUN wget https://download3.rstudio.org/centos5.9/x86_64/shiny-server-1.5.3.838-rh5-x86_64.rpm && yum install -y --nogpgcheck shiny-server-1.5.3.838-rh5-x86_64.rpm
 
