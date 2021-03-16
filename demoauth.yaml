@@ -5,6 +5,7 @@ metadata:
   labels:
     app: oauth-proxy
   name: oauth-proxy
+  namespace: apex-demo
 spec:
   type: ClusterIP
   ports:
@@ -21,6 +22,7 @@ metadata:
   labels:
     app: oauth-proxy
   name: oauth-proxy
+  namespace: apex-demo
 spec:
   replicas: 1
   selector:
@@ -37,26 +39,36 @@ spec:
         env:
           # OIDC Config
           - name: "OAUTH2_PROXY_PROVIDER"
-            value: "oidc"
-          - name: "OAUTH2_PROXY_OIDC_ISSUER_URL"
-            value: "https://signin.my-oidc-provider.com"
+            value: "azure"
+          - name: "OAUTH2_PROXY_AZURE_TENANT"
+            value: "eb220b88-5284-444b-aaa3-51f828b715db"
           - name: "OAUTH2_PROXY_CLIENT_ID"
-            value: "<my oauth client id>"
+            value: "f1e3584c-79dc-43e9-af42-08894466e8bc"
           - name: "OAUTH2_PROXY_CLIENT_SECRET"
-            value: "<my oauth client secret>"
-
+            value: "26gD4WH.hVoxL5t96_P-N2zak3twSNnZ3-"
 
           # Cookie Config
+          #- name: "OAUTH2_PROXY_COOKIE_SECURE"
+          #  value: "false"
           - name: "OAUTH2_PROXY_COOKIE_SECRET"
-            value: "<my cookie secret>"
+            value: "0123456789012345"
+          - name: "OAUTH2_PROXY_COOKIE_SAMESITE"
+            value: "lax"
           - name: "OAUTH2_PROXY_COOKIE_DOMAINS"
-            value: ".mydomain.com"
+            value: ".apex.atoscloud.org"
+          - name: "OAUTH2_PROXY_SESSION_STORE_TYPE"
+            value: "redis"
+          - name: "OAUTH2_PROXY_REDIS_CONNECTION_URL"
+            value: "redis://apexdemo.redis.cache.windows.net:6379"
+          - name: "OAUTH2_PROXY_REDIS_PASSWORD"
+            value: "l6kMWRR1pQl1cwZINL5HtNt1FhJ5TJUyzNLw0LQM1mI="
 
-          # Proxy config
+
+          #Proxy Config
           - name: "OAUTH2_PROXY_EMAIL_DOMAINS"
-            value: "mydomain.com"
+            value: "*"
           - name: "OAUTH2_PROXY_WHITELIST_DOMAINS"
-            value: ".mydomain.com"
+            value: ".apex.atoscloud.org"
           - name: "OAUTH2_PROXY_HTTP_ADDRESS"
             value: "0.0.0.0:4180"
           - name: "OAUTH2_PROXY_SET_XAUTHREQUEST"
@@ -71,12 +83,12 @@ metadata:
   labels:
     app: oauth-proxy
   name: oauth-proxy
+  namespace: apex-demo
 spec:
   rules:
     - host: auth.apex.atoscloud.org
       http:
         paths:
-          - path: /oauth2
-            backend:
+          - backend:
               serviceName: oauth-proxy
               servicePort: 4180

@@ -40,14 +40,14 @@ metadata:
   namespace: apex-demo
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/auth-signin: http://auth.apex.atoscloud.org/oauth2/start
-    nginx.ingress.kubernetes.io/auth-url: http://auth.apex.atoscloud.org/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://auth.apex.atoscloud.org/oauth2/start
+    nginx.ingress.kubernetes.io/auth-url: https://auth.apex.atoscloud.org/oauth2/auth
     nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User,X-Auth-Request-Email
 spec:
   rules:
-  - http:
+  - host: demo.apex.atoscloud.org
+    http:
       paths:
       - backend:
           serviceName: apex-entrypoint
           servicePort: 80
-        path: /.*
