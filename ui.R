@@ -64,7 +64,7 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     useShinyjs(),
-    extendShinyjs(text = jscode,functions = c()),
+    extendShinyjs(text = jscode,functions = c('collapse')),
     tabItems(
       
       # Start of welcome tab
