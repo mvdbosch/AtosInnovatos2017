@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apex-analyticsapp
+  namespace: apex-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analyticsapp
+  template:
+    metadata:
+      labels:
+        app: analyticsapp
+    spec:
+      containers:
+      - name: analyticsapp
+        image: registry.marcel.im/atosanalyticsapp
+        ports:
+        - containerPort: 3838
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apex-entrypoint
+  namespace: apex-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: analyticsapp
+  ports:
+  - port: 80
+    targetPort: 3838
+---
+# ingress controller
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: apexdemo-ingress
+  namespace: apex-demo
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/auth-signin: https://auth.apex.atoscloud.org/oauth2/start
+    nginx.ingress.kubernetes.io/auth-url: https://auth.apex.atoscloud.org/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-response-headers: X-Auth-Request-User,X-Auth-Request-Email
+spec:
+  rules:
+  - host: demo.apex.atoscloud.org
+    http:
+      paths:
+      - backend:
+          serviceName: apex-entrypoint
+          servicePort: 80
